@@ -15,17 +15,9 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     @Override
     @Transactional
     public Producto save(Producto p) {
-        if(p.getId() == null) {
-            entityManager.persist(p);
-            return p;
-        }else{
-            if(findById(p.getId())!= null) {
-                entityManager.merge(p);
-                return p;
-            }else{
-                return null;
-            }
-        }
+        entityManager.persist(p);
+        entityManager.flush();
+        return p;
     }
 
     @Override
@@ -42,5 +34,12 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     @Transactional
     public void delete(Integer id) {
         entityManager.remove(entityManager.getReference(Producto.class, id));
+    }
+
+    @Override
+    public Producto update(Producto p) {
+        entityManager.merge(p);
+        entityManager.flush();
+        return p;
     }
 }

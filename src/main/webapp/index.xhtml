@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <meta charset="UTF-8"/>
+    <title>GESTIÓN DE PRODUCTOS</title>
+</h:head>
+<h:body>
+
+    <h:form id="selectorSeccion">
+        <p:selectOneMenu value="#{productoBean.seccionActiva}">
+            <f:selectItem itemLabel="Productos" itemValue="productos"/>
+            <f:selectItem itemLabel="Categorías" itemValue="categorias"/>
+            <p:ajax update="panelesCRUD"/>
+        </p:selectOneMenu>
+    </h:form>
+    <h:panelGroup id="panelesCRUD">
+        <h:panelGroup rendered="#{productoBean.seccionActiva eq 'productos'}">
+            <h:form id="formConsulta">
+                <p:dataTable id="tableProductos"
+                             value="#{productoBean.productos}"
+                             var="p"
+                             selection="#{productoBean.productoSeleccionado}"
+                             selectionMode="single"
+                             rowKey="#{p.id}"
+                             editable="true"
+                             editMode="row">
+
+                    <!-- Evento de edición de fila -->
+                    <p:ajax event="rowEdit" listener="#{productoBean.actualizarProducto}"/>
+                    <!-- Evento de cancelación de edición -->
+                    <p:ajax event="rowEditCancel" update="formConsulta:tableProductos"/>
+
+                    <!-- Columna que muestra el ID del producto (solo lectura) -->
+                    <p:column headerText="ID">
+                        <h:outputText value="#{p.id}"/>
+                    </p:column>
+
+
+                    <!-- Columna editable para el nombre del producto -->
+                    <p:column headerText="Nombre" editor="true">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{p.nombre}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{p.nombre}"/>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <!-- Columna editable para la descripción del producto -->
+                    <p:column headerText="Descripción" editor="true">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{p.descripcion}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{p.descripcion}"/>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Existencia" editor="true">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{p.existencia}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{p.existencia}"/>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <!-- Columna editable para seleccionar la categoría del producto -->
+                    <p:column headerText="Categoría" editor="true">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{p.categoria.nombre}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:selectOneMenu value="#{p.categoria}"
+                                                 converter="categoriaConverter"
+                                                 style="width:100%">
+                                    <f:selectItems value="#{productoBean.categorias}"
+                                                   var="cat"
+                                                   itemLabel="#{cat.nombre}"
+                                                   itemValue="#{cat}"/>
+                                    <f:attribute name="categoriasList" value="#{productoBean.categorias}"/>
+                                </p:selectOneMenu>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+
+                    <p:column headerText="Acciones">
+                        <p:rowEditor/>
+                        <p:commandButton icon="pi pi-trash"
+                                         action="#{productoBean.eliminarProducto(p.id)}"
+                                         update="formConsulta:tableProductos"
+                                         process="@this"/>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+
+            <h:form id="formCrear">
+                <p:messages id="msgs" autoUpdate="true" closable="true"/>
+
+                <p:panel header="Crear nuevo producto">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel value="Nombre" for="nombre"/>
+                        <p:inputText id="nombre" value="#{productoBean.productoNuevo.nombre}"/>
+
+                        <p:outputLabel value="Descripcion" for="descripcion"/>
+                        <p:inputText id="descripcion" value="#{productoBean.productoNuevo.descripcion}"/>
+
+                        <p:outputLabel value="Existencia" for="existencia"/>
+                        <p:inputText id="existencia" value="#{productoBean.productoNuevo.existencia}"/>
+
+                        <p:outputLabel value="Categoría" for="categoria"/>
+                        <p:selectOneMenu id="categoria"
+                                         value="#{productoBean.categoriaSeleccionada}"
+                                         converter="categoriaConverter"
+                                         required="true"
+                                         style="width:100%">
+                            <f:selectItem itemLabel="-- Seleccione --" itemValue="#{null}"/>
+
+                            <f:selectItems value="#{productoBean.categorias}"
+                                           var="cat" itemLabel="#{cat.nombre}"
+                                           itemValue="#{cat}"/>
+
+                            <f:attribute name="categoriasList" value="#{productoBean.categorias}"/>
+                        </p:selectOneMenu>
+                    </p:panelGrid>
+                    <p:commandButton value="Crear"
+                                     action="#{productoBean.crearProducto}"
+                                     update="formCrear formConsulta:tableProductos"
+                                     process="@form"
+                                     icon="pi pi-plus"/>
+                </p:panel>
+            </h:form>
+        </h:panelGroup>
+
+        <!-- Panel nuevo de categorías -->
+        <h:panelGroup rendered="#{productoBean.seccionActiva eq 'categorias'}">
+            <h:form id="formCategoria">
+
+                <p:messages autoUpdate="true" closable="true"/>
+
+
+                <p:dataTable id="formListaCategorias"
+                             value="#{categoriaBean.categorias}"
+                             var="cat"
+                             editable="true"
+                             editMode="row"
+                             rowKey="#{cat.id}"
+                             selectionMode="single"
+                             selection="#{categoriaBean.categoriaSeleccionada}">
+
+                    <p:ajax event="rowEdit" listener="#{categoriaBean.actualizarCategoria}" update="formListaCategorias"/>
+                    <p:ajax event="rowEditCancel" update="formListaCategorias"/>
+
+                    <p:column headerText="ID">
+                        <h:outputText value="#{cat.id}"/>
+                    </p:column>
+
+                    <p:column headerText="Nombre" editor="true">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{cat.nombre}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{cat.nombre}"/>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Descripción" editor="true">
+                        <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{cat.descripcion}"/>
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:inputText value="#{cat.descripcion}"/>
+                            </f:facet>
+                        </p:cellEditor>
+                    </p:column>
+
+                    <p:column headerText="Acciones">
+                        <p:rowEditor/>
+                        <p:commandButton icon="pi pi-trash"
+                                         action="#{categoriaBean.eliminarCategoria(cat.id)}"
+                                         update="formCategoria"/>
+                    </p:column>
+                </p:dataTable>
+
+
+                <p:panel header="Crear nueva categoría">
+                    <p:panelGrid columns="2">
+                        <p:outputLabel for="nombreCat" value="Nombre"/>
+                        <p:inputText id="nombreCat" value="#{categoriaBean.categoriaNueva.nombre}"/>
+
+                        <p:outputLabel for="descCat" value="Descripción"/>
+                        <p:inputText id="descCat" value="#{categoriaBean.categoriaNueva.descripcion}"/>
+                    </p:panelGrid>
+
+                    <p:commandButton value="Crear"
+                                     action="#{categoriaBean.crearCategoria}"
+                                     update="formCategoria"
+                                     icon="pi pi-plus"
+                                     process="@form"/>
+                </p:panel>
+            </h:form>
+        </h:panelGroup>
+    </h:panelGroup>
+</h:body>
+</html>

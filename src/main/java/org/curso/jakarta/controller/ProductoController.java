@@ -36,8 +36,14 @@ public class ProductoController {
     @Path("/{id}")
     @PUT
     @Produces(APPLICATION_JSON)
-    public Response updateProductoById(@PathParam("id") Integer id, Producto producto){
-        Producto p = productoService.update(id, producto);
+    @Consumes(APPLICATION_JSON)
+    public Response updateProducto(@PathParam("id") Integer id, Producto producto){
+        if(!id.equals(producto.getId())){
+            return Response.status(Response.Status.BAD_REQUEST).
+                    entity("El ID del URL no coincide con el ID del cuerpo del producto").
+                    build();
+        }
+        Producto p = productoService.update(producto);
         if(p != null ){
             return Response.ok().status(Response.Status.OK).entity(p).build();
         }else{

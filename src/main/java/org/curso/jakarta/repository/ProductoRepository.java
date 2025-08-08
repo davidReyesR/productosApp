@@ -9,4 +9,5 @@ public interface ProductoRepository {
     List<Producto> listAll();
     Producto findById(Integer id);
     void delete(Integer id);
+    Producto update(Producto p);
 }

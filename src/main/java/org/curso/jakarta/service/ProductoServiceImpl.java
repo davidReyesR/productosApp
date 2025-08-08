@@ -14,11 +14,9 @@ public class ProductoServiceImpl implements ProductoService{
     public Producto save(Producto p) {
         return productoRepository.save(p);
     }
-
     @Override
-    public Producto update(Integer id, Producto p) {
-        p.setId(id);
-        return productoRepository.save(p);
+    public Producto update(Producto p) {
+        return productoRepository.update(p);
     }
     @Override
     public List<Producto> listAll() {
