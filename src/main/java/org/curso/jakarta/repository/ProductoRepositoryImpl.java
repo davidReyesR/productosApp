@@ -37,6 +37,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
     }
 
     @Override
+    @Transactional
     public Producto update(Producto p) {
         entityManager.merge(p);
         entityManager.flush();
