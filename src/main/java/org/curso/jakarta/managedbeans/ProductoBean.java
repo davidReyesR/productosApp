@@ -104,7 +104,7 @@ public class ProductoBean implements Serializable {
                 put(Entity.entity(productoSeleccionado, MediaType.APPLICATION_JSON));
 
         if(response.getStatus() == 200){
-            listarProductos();
+            //listarProductos();
             productoSeleccionado = new Producto();
             PrimeFaces.current().ajax().update("formConsulta:tableProductos");
         }else{

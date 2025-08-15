@@ -85,7 +85,7 @@ public class CategoriaBean implements Serializable {
                 put(Entity.entity(categoriaSeleccionada, MediaType.APPLICATION_JSON));
 
         if(response.getStatus() == 200){
-            listarCategorias();
+            //listarCategorias();
             categoriaSeleccionada = new Categoria();
             PrimeFaces.current().ajax().update("formListaCategoria");
         }else{
